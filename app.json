@@ -6,11 +6,6 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#0F172A"
-    },
     "ios": {
       "supportsTablet": true
     },
@@ -30,7 +25,9 @@
           "photosPermission": "Snapline anılarınıza fotoğraf eklemek için galerinize erişim ister.",
           "cameraPermission": "Snapline anlık anı yakalamanız için kameraya erişim ister."
         }
-      ]
+      ],
+      "expo-asset",
+      "expo-font"
     ]
   }
 }
