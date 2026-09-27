@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -11,146 +11,171 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
-import { isSupabaseConfigured, supabase } from '../lib/supabase';
 import { Entry } from '../types';
 
 interface ProfileScreenProps {
   entries: Entry[];
   isDarkMode: boolean;
   onToggleTheme: () => void;
+  isLockEnabled: boolean;
+  onToggleLock: () => void;
+  onLockNow: () => void;
+  onOpenWelcome?: () => void;
+  onOpenSplash?: () => void;
 }
 
 export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   entries,
   isDarkMode,
   onToggleTheme,
+  isLockEnabled,
+  onToggleLock,
+  onLockNow,
+  onOpenWelcome,
+  onOpenSplash,
 }) => {
   const theme = isDarkMode ? Colors.dark : Colors.light;
-  const [username, setUsername] = useState('Arif Çınar');
-  const [avatarUrl] = useState('https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&auto=format&fit=crop&q=80');
 
-  const supabaseActive = isSupabaseConfigured();
-
-  const handleExportData = () => {
-    const dataStr = JSON.stringify(entries, null, 2);
-    Alert.alert(
-      'Veriler Dışa Aktarıldı',
-      `Toplam ${entries.length} anı başarıyla dışa aktarılmaya hazır.\n\nJSON Boyutu: ${dataStr.length} karakter.`
-    );
-  };
-
-  const handleLogout = async () => {
-    if (supabaseActive) {
-      await supabase.auth.signOut();
-    }
-    Alert.alert('Çıkış Yapıldı', 'Güvenli bir şekilde çıkış yaptınız.');
-  };
+  const userAvatar = 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=400&auto=format&fit=crop&q=80';
+  const userName = 'Arif Çınar';
+  const userHandle = 'snapline.app/@arif';
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.content}>
-        {/* Profile Card Header */}
-        <View style={[styles.profileCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}>
-          <Image source={{ uri: avatarUrl }} style={styles.avatar} />
-          <Text style={[styles.username, { color: theme.textPrimary }]}>{username}</Text>
-          <Text style={[styles.userHandle, { color: theme.textMuted }]}>@arifecinar • Snapline Premium</Text>
+        {/* Header Title */}
+        <Text style={[styles.screenTitle, { color: theme.textPrimary }]}>Ayarlar</Text>
 
-          {/* User Stats Grid */}
-          <View style={styles.statsGrid}>
-            <View style={styles.gridItem}>
-              <Text style={[styles.gridValue, { color: theme.accent }]}>{entries.length}</Text>
-              <Text style={[styles.gridLabel, { color: theme.textSecondary }]}>Toplam Anı</Text>
-            </View>
-            <View style={[styles.gridDivider, { backgroundColor: theme.cardBorder }]} />
-            <View style={styles.gridItem}>
-              <Text style={[styles.gridValue, { color: theme.accent }]}>7 Gün</Text>
-              <Text style={[styles.gridLabel, { color: theme.textSecondary }]}>Aktif Seri</Text>
-            </View>
+        {/* User Card */}
+        <View style={[styles.userCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}>
+          <Image source={{ uri: userAvatar }} style={styles.avatar} />
+          <View style={styles.userInfo}>
+            <Text style={[styles.userName, { color: theme.textPrimary }]}>{userName}</Text>
+            <Text style={[styles.userHandle, { color: theme.textMuted }]}>{userHandle}</Text>
           </View>
         </View>
 
-        {/* Backend & Cloud Status */}
-        <View style={[styles.statusCard, { backgroundColor: theme.surfaceSecondary, borderColor: theme.cardBorder }]}>
-          <View style={styles.statusLeft}>
-            <Ionicons
-              name={supabaseActive ? 'cloud-done' : 'cloud-offline'}
-              size={22}
-              color={supabaseActive ? theme.accent : theme.gold}
+        {/* Grouped Settings Cards matching Mockup */}
+        <View style={styles.settingsGroup}>
+          {/* 1. HESAP */}
+          <TouchableOpacity
+            style={[styles.settingsCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}
+            onPress={() => Alert.alert('Hesap', 'Hesap detayları ve profil düzenleme.')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingsCardContent}>
+              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Hesap</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
+          </TouchableOpacity>
+
+          {/* 2. GÜVENLİK & KİLİT (Biyometrik / PIN) */}
+          <View
+            style={[styles.settingsCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}
+          >
+            <View style={styles.settingsCardContent}>
+              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Uygulama Kilidi</Text>
+              <Text style={[styles.cardSubtext, { color: theme.textMuted }]}>
+                {isLockEnabled ? 'Biyometrik / PIN koruması açık' : 'Kilit devre dışı'}
+              </Text>
+            </View>
+            <Switch
+              value={isLockEnabled}
+              onValueChange={onToggleLock}
+              trackColor={{ false: '#D4CDC5', true: theme.accent }}
+              thumbColor="#FFFFFF"
             />
-            <View>
-              <Text style={[styles.statusTitle, { color: theme.textPrimary }]}>
-                {supabaseActive ? 'Supabase Bağlı' : 'Yerel Depolama (Demo)'}
+          </View>
+
+          {/* If Lock is enabled, show 'Şimdi Kilitle' quick action */}
+          {isLockEnabled && (
+            <TouchableOpacity
+              style={[styles.quickLockBtn, { backgroundColor: theme.surfaceSecondary }]}
+              onPress={onLockNow}
+              activeOpacity={0.7}
+            >
+              <Ionicons name="lock-closed-outline" size={16} color={theme.accent} />
+              <Text style={[styles.quickLockText, { color: theme.accent }]}>
+                Uygulamayı Şimdi Kilitle
               </Text>
-              <Text style={[styles.statusSub, { color: theme.textMuted }]}>
-                {supabaseActive ? 'Anılarınız bulutta senkronize ediliyor.' : 'Veriler cihazınızda güvenle saklanıyor.'}
+            </TouchableOpacity>
+          )}
+
+          {/* 3. VERİLER (Bulut Yedekleme Açık) */}
+          <TouchableOpacity
+            style={[styles.settingsCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}
+            onPress={() => Alert.alert('Veriler', `Bulut yedekleme aktif. Toplam ${entries.length} anı senkronize edildi.`)}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingsCardContent}>
+              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Veriler</Text>
+              <Text style={[styles.cardSubtext, { color: theme.textMuted }]}>Bulut Yedekleme Açık</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
+          </TouchableOpacity>
+
+          {/* 4. UYGULAMA (Tema) */}
+          <TouchableOpacity
+            style={[styles.settingsCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}
+            onPress={onToggleTheme}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingsCardContent}>
+              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Uygulama</Text>
+              <Text style={[styles.cardSubtext, { color: theme.textMuted }]}>
+                Tema ({isDarkMode ? 'Karanlık Mod' : 'Aydınlık Mod'})
               </Text>
             </View>
-          </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
+          </TouchableOpacity>
+
+          {/* 5. HAKKINDA */}
+          <TouchableOpacity
+            style={[styles.settingsCard, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}
+            onPress={() => Alert.alert('Hakkında', 'Snapline v1.0.0\nGünlük tutmanın en sade ve görsel yolu.')}
+            activeOpacity={0.7}
+          >
+            <View style={styles.settingsCardContent}>
+              <Text style={[styles.cardTitle, { color: theme.textPrimary }]}>Hakkında</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
+          </TouchableOpacity>
         </View>
 
-        {/* Settings Section */}
-        <Text style={[styles.sectionTitle, { color: theme.textSecondary }]}>UYGULAMA AYARLARI</Text>
+        {/* Demo Navigators to review Splash & Welcome screens */}
+        <View style={styles.previewSection}>
+          <Text style={[styles.previewSectionTitle, { color: theme.textMuted }]}>
+            EKRAN ÖNİZLEMELERİ
+          </Text>
 
-        {/* Theme Toggle Option */}
-        <View style={[styles.optionRow, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}>
-          <View style={styles.optionLeft}>
-            <View style={[styles.iconBox, { backgroundColor: theme.accentSoft }]}>
-              <Ionicons name={isDarkMode ? 'moon' : 'sunny'} size={18} color={theme.accent} />
-            </View>
-            <Text style={[styles.optionLabel, { color: theme.textPrimary }]}>Karanlık Tema</Text>
+          <View style={styles.previewBtnRow}>
+            {onOpenSplash && (
+              <TouchableOpacity
+                style={[styles.previewBtn, { backgroundColor: theme.surfaceSecondary }]}
+                onPress={onOpenSplash}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="sparkles-outline" size={15} color={theme.accent} />
+                <Text style={[styles.previewBtnText, { color: theme.textPrimary }]}>
+                  Splash Ekranı
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {onOpenWelcome && (
+              <TouchableOpacity
+                style={[styles.previewBtn, { backgroundColor: theme.surfaceSecondary }]}
+                onPress={onOpenWelcome}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="enter-outline" size={15} color={theme.accent} />
+                <Text style={[styles.previewBtnText, { color: theme.textPrimary }]}>
+                  Karşılama Ekranı
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
-          <Switch
-            value={isDarkMode}
-            onValueChange={onToggleTheme}
-            trackColor={{ false: '#CBD5E1', true: theme.accent }}
-            thumbColor="#FFF"
-          />
         </View>
-
-        {/* Export Data Option */}
-        <TouchableOpacity
-          style={[styles.optionRow, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}
-          onPress={handleExportData}
-          activeOpacity={0.7}
-        >
-          <View style={styles.optionLeft}>
-            <View style={[styles.iconBox, { backgroundColor: 'rgba(99, 102, 241, 0.15)' }]}>
-              <Ionicons name="download-outline" size={18} color="#6366F1" />
-            </View>
-            <Text style={[styles.optionLabel, { color: theme.textPrimary }]}>Anıları Dışa Aktar (Yedekle)</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
-        </TouchableOpacity>
-
-        {/* Security & RLS Details */}
-        <TouchableOpacity
-          style={[styles.optionRow, { backgroundColor: theme.cardBackground, borderColor: theme.cardBorder }]}
-          onPress={() => Alert.alert('Gizlilik & Güvenlik', 'Snapline veritabanında Row Level Security (RLS) ile anılarınız tamamen size özel şifrelenir.')}
-          activeOpacity={0.7}
-        >
-          <View style={styles.optionLeft}>
-            <View style={[styles.iconBox, { backgroundColor: 'rgba(16, 185, 129, 0.15)' }]}>
-              <Ionicons name="shield-checkmark-outline" size={18} color="#10B981" />
-            </View>
-            <Text style={[styles.optionLabel, { color: theme.textPrimary }]}>Veri Güvenliği & RLS</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={18} color={theme.textMuted} />
-        </TouchableOpacity>
-
-        {/* Logout Button */}
-        <TouchableOpacity
-          style={[styles.logoutBtn, { backgroundColor: 'rgba(239, 68, 68, 0.1)', borderColor: 'rgba(239, 68, 68, 0.3)' }]}
-          onPress={handleLogout}
-          activeOpacity={0.8}
-        >
-          <Ionicons name="log-out-outline" size={20} color={theme.danger} />
-          <Text style={[styles.logoutBtnText, { color: theme.danger }]}>Oturumu Kapat</Text>
-        </TouchableOpacity>
-
-        {/* Footer Version */}
-        <Text style={[styles.footerText, { color: theme.textMuted }]}>
-          Snapline v1.0.0 • React Native & Supabase
-        </Text>
       </View>
     </ScrollView>
   );
@@ -161,124 +186,117 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    padding: 20,
+    paddingHorizontal: 16,
+    paddingTop: 12,
     paddingBottom: 40,
   },
-  profileCard: {
-    borderRadius: 24,
-    borderWidth: 1,
-    padding: 24,
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  avatar: {
-    width: 84,
-    height: 84,
-    borderRadius: 42,
-    marginBottom: 12,
-  },
-  username: {
+  screenTitle: {
     fontSize: 20,
     fontWeight: '800',
+    letterSpacing: -0.4,
+    marginBottom: 14,
+  },
+  userCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 18,
+    borderWidth: 1,
+    marginBottom: 16,
+    gap: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#EBE5DC',
+  },
+  userInfo: {
+    flex: 1,
+  },
+  userName: {
+    fontSize: 16,
+    fontWeight: '700',
   },
   userHandle: {
     fontSize: 12,
     fontWeight: '500',
-    marginTop: 4,
-    marginBottom: 16,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    width: '100%',
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  gridItem: {
-    flex: 1,
-    alignItems: 'center',
-  },
-  gridValue: {
-    fontSize: 20,
-    fontWeight: '800',
-  },
-  gridLabel: {
-    fontSize: 12,
-    fontWeight: '600',
     marginTop: 2,
   },
-  gridDivider: {
-    width: 1,
-    height: '80%',
+  settingsGroup: {
+    gap: 10,
+    marginBottom: 20,
   },
-  statusCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    padding: 14,
-    marginBottom: 24,
-  },
-  statusLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  statusTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  statusSub: {
-    fontSize: 11,
-    marginTop: 2,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-    marginBottom: 10,
-    marginLeft: 4,
-  },
-  optionRow: {
+  settingsCard: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
     borderRadius: 16,
     borderWidth: 1,
-    marginBottom: 10,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 5,
+    elevation: 1,
   },
-  optionLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
+  settingsCardContent: {
+    flex: 1,
   },
-  iconBox: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  optionLabel: {
+  cardTitle: {
     fontSize: 14,
-    fontWeight: '600',
-  },
-  logoutBtn: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 1,
-    marginTop: 16,
-    gap: 8,
-  },
-  logoutBtnText: {
-    fontSize: 15,
     fontWeight: '700',
   },
-  footerText: {
-    textAlign: 'center',
+  cardSubtext: {
     fontSize: 11,
-    marginTop: 24,
+    fontWeight: '500',
+    marginTop: 4,
+    lineHeight: 16,
+  },
+  quickLockBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 6,
+    marginTop: -2,
+    marginBottom: 4,
+  },
+  quickLockText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  previewSection: {
+    marginTop: 8,
+  },
+  previewSectionTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    marginBottom: 10,
+  },
+  previewBtnRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  previewBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    borderRadius: 12,
+    gap: 6,
+  },
+  previewBtnText: {
+    fontSize: 12,
+    fontWeight: '600',
   },
 });

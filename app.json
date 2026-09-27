@@ -5,14 +5,19 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B121E"
+    },
     "ios": {
       "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#0F172A"
+        "backgroundColor": "#0B121E"
       }
     },
     "web": {
@@ -27,7 +32,9 @@
         }
       ],
       "expo-asset",
-      "expo-font"
+      "expo-font",
+      "expo-splash-screen",
+      "expo-secure-store"
     ]
   }
 }

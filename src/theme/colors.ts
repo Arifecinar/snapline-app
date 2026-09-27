@@ -1,41 +1,43 @@
 export const Colors = {
   dark: {
-    background: '#0B0F19',
-    cardBackground: 'rgba(23, 31, 49, 0.85)',
+    background: '#0F1722',
+    cardBackground: '#172232',
     cardBorder: 'rgba(255, 255, 255, 0.08)',
-    surface: '#171F31',
-    surfaceSecondary: '#212D45',
+    surface: '#172232',
+    surfaceSecondary: '#213045',
     textPrimary: '#F8FAFC',
     textSecondary: '#94A3B8',
     textMuted: '#64748B',
-    accent: '#14B8A6', // Teal
-    accentGradient: ['#14B8A6', '#06B6D4'] as const,
-    accentSoft: 'rgba(20, 184, 166, 0.15)',
-    secondaryAccent: '#6366F1', // Indigo
+    accent: '#5E88A1', // Slate blue
+    accentGradient: ['#4E7185', '#6D96AE'] as const,
+    accentSoft: 'rgba(94, 136, 161, 0.2)',
+    secondaryAccent: '#D2AB80',
+    peach: '#C28254',
     gold: '#F59E0B',
     danger: '#EF4444',
-    timelineLine: 'rgba(20, 184, 166, 0.3)',
-    tabBarBackground: '#0F172A',
-    inputBackground: '#1E293B',
+    timelineLine: '#2E3F57',
+    tabBarBackground: '#111B28',
+    inputBackground: '#1B283A',
   },
   light: {
-    background: '#F8FAFC',
+    background: '#F7F4F0', // Warm ivory cream
     cardBackground: '#FFFFFF',
-    cardBorder: 'rgba(226, 232, 240, 0.8)',
+    cardBorder: '#EDE6DE',
     surface: '#FFFFFF',
-    surfaceSecondary: '#F1F5F9',
-    textPrimary: '#0F172A',
-    textSecondary: '#475569',
-    textMuted: '#94A3B8',
-    accent: '#0D9488',
-    accentGradient: ['#0D9488', '#0284C7'] as const,
-    accentSoft: 'rgba(13, 148, 136, 0.1)',
-    secondaryAccent: '#4F46E5',
+    surfaceSecondary: '#F2EDE6',
+    textPrimary: '#1E2B33',
+    textSecondary: '#5C6E7C',
+    textMuted: '#8D9EA9',
+    accent: '#4E7185', // Editorial slate blue
+    accentGradient: ['#4E7185', '#6B8E9F'] as const,
+    accentSoft: '#E3ECEF',
+    secondaryAccent: '#BA926D',
+    peach: '#F6D6BA', // Peach calendar highlight badge
     gold: '#D97706',
     danger: '#DC2626',
-    timelineLine: 'rgba(13, 148, 136, 0.25)',
-    tabBarBackground: '#FFFFFF',
-    inputBackground: '#F1F5F9',
+    timelineLine: '#E2DAD2',
+    tabBarBackground: '#FAF7F4',
+    inputBackground: '#F3EFE9',
   }
 };
 

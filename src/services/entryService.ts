@@ -2,57 +2,67 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { Entry, CreateEntryDTO, WeeklyStats, MoodScore } from '../types';
 
-const STORAGE_KEY = '@snapline_local_entries_v1';
+const STORAGE_KEY = '@snapline_local_entries_v2';
 
 const MOCK_INITIAL_ENTRIES: Entry[] = [
   {
     id: 'mock-1',
     user_id: 'user-demo',
-    image_url: 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?w=800&auto=format&fit=crop&q=80',
-    note_text: 'Sabah kahvesi ve günlük okuma rutini. Güne sakince başlamak çok iyi geldi. ☕✨',
+    title: 'Kahvaltı',
+    location: 'Ev',
+    image_url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=800&auto=format&fit=crop&q=80',
+    note_text: 'Güne keyifli bir başlangıç.',
     timestamp: '08:30',
-    entry_date: new Date().toISOString().split('T')[0],
-    created_at: new Date(Date.now() - 3600 * 1000 * 4).toISOString(),
+    entry_date: '2026-10-12',
+    created_at: new Date(Date.now() - 3600 * 1000 * 6).toISOString(),
     tags: [
-      { id: 't1', entry_id: 'mock-1', tag_name: 'Kahve', mood_score: 5 },
-      { id: 't2', entry_id: 'mock-1', tag_name: 'Sabah', mood_score: 5 }
+      { id: 't1', entry_id: 'mock-1', tag_name: 'Kahvaltı', mood_score: 5 },
+      { id: 't2', entry_id: 'mock-1', tag_name: 'Ev', mood_score: 5 }
     ]
   },
   {
     id: 'mock-2',
     user_id: 'user-demo',
-    image_url: 'https://images.unsplash.com/photo-1476514525535-ce74f458149e?w=800&auto=format&fit=crop&q=80',
-    note_text: 'Öğle arası sahil yürüyüşü. Deniz havası zihnimi tamamen boşalttı.',
-    timestamp: '13:15',
-    entry_date: new Date().toISOString().split('T')[0],
-    created_at: new Date(Date.now() - 3600 * 1000 * 2).toISOString(),
+    title: 'Sahil Yürüyüşü',
+    location: 'Sahil',
+    image_url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80',
+    note_text: 'Harika bir öğle arası yürüyüşü, deniz havası iyi geldi.',
+    timestamp: '12:15',
+    entry_date: '2026-10-12',
+    created_at: new Date(Date.now() - 3600 * 1000 * 3).toISOString(),
     tags: [
-      { id: 't3', entry_id: 'mock-2', tag_name: 'Yürüyüş', mood_score: 4 },
-      { id: 't4', entry_id: 'mock-2', tag_name: 'Doğa', mood_score: 4 }
+      { id: 't3', entry_id: 'mock-2', tag_name: 'Yürüyüş', mood_score: 5 },
+      { id: 't4', entry_id: 'mock-2', tag_name: 'Sahil', mood_score: 4 }
     ]
   },
   {
     id: 'mock-3',
     user_id: 'user-demo',
-    image_url: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&auto=format&fit=crop&q=80',
-    note_text: 'Akşam kitap kulübü toplantısı. Yeni sürüm mimarisini tartıştık.',
-    timestamp: '19:45',
-    entry_date: new Date(Date.now() - 86400 * 1000 * 1).toISOString().split('T')[0],
-    created_at: new Date(Date.now() - 86400 * 1000 * 1).toISOString(),
+    title: 'Kahve Molası',
+    location: 'Espresso Lab - Moda',
+    image_url: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=800&auto=format&fit=crop&q=80',
+    note_text: 'Harika bir akşamüstü kahvesi...',
+    timestamp: '14:30',
+    entry_date: '2026-10-12',
+    created_at: new Date(Date.now() - 3600 * 1000 * 1).toISOString(),
     tags: [
-      { id: 't5', entry_id: 'mock-3', tag_name: 'Kitap', mood_score: 5 }
+      { id: 't5', entry_id: 'mock-3', tag_name: 'kahve', mood_score: 5 },
+      { id: 't6', entry_id: 'mock-3', tag_name: 'ilkbahar', mood_score: 5 }
     ]
   },
   {
     id: 'mock-4',
     user_id: 'user-demo',
-    image_url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80',
-    note_text: 'Eski dostlarla akşam yemeği ve sohbet. Günün yorgunluğunu unuttuk.',
-    timestamp: '21:00',
-    entry_date: new Date(Date.now() - 86400 * 1000 * 2).toISOString().split('T')[0],
-    created_at: new Date(Date.now() - 86400 * 1000 * 2).toISOString(),
+    title: 'Kitap Kulübü',
+    location: 'Cafe',
+    image_url: 'https://images.unsplash.com/photo-1521017432531-fbd92d768814?w=800&auto=format&fit=crop&q=80',
+    note_text: 'Kitap kulübü ile derin sohbet.',
+    timestamp: '19:05',
+    entry_date: '2026-10-12',
+    created_at: new Date(Date.now() - 86400 * 1000 * 1).toISOString(),
     tags: [
-      { id: 't6', entry_id: 'mock-4', tag_name: 'Sohbet', mood_score: 4 }
+      { id: 't7', entry_id: 'mock-4', tag_name: 'Kitap', mood_score: 4 },
+      { id: 't8', entry_id: 'mock-4', tag_name: 'Sohbet', mood_score: 5 }
     ]
   }
 ];
@@ -83,9 +93,11 @@ export const fetchEntries = async (): Promise<Entry[]> => {
   try {
     const jsonStr = await AsyncStorage.getItem(STORAGE_KEY);
     if (jsonStr) {
-      return JSON.parse(jsonStr);
+      const parsed = JSON.parse(jsonStr);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed;
+      }
     }
-    // Initialize with mock data if empty
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(MOCK_INITIAL_ENTRIES));
     return MOCK_INITIAL_ENTRIES;
   } catch (e) {
@@ -100,7 +112,9 @@ export const createEntry = async (dto: CreateEntryDTO): Promise<Entry> => {
   const newEntry: Entry = {
     id: newEntryId,
     user_id: 'user-demo',
-    image_url: dto.image_url || 'https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop&q=80',
+    title: dto.title,
+    location: dto.location,
+    image_url: dto.image_url || 'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=800&auto=format&fit=crop&q=80',
     note_text: dto.note_text,
     timestamp: dto.timestamp || now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
     entry_date: dto.entry_date || now.toISOString().split('T')[0],

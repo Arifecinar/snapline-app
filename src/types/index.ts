@@ -24,17 +24,21 @@ export interface EntryTag {
 export interface Entry {
   id: string;
   user_id: string;
+  title?: string; // e.g., "Kahvaltı", "Sahil Yürüyüşü", "Kitap Kulübü"
+  location?: string; // e.g., "Ev", "Sahil", "Cafe", "Espresso Lab - Moda"
   image_url?: string;
   note_text: string;
   timestamp: string; // e.g., "08:30"
-  entry_date: string; // e.g., "2026-09-21"
+  entry_date: string; // e.g., "2026-10-12"
   created_at: string;
   tags?: EntryTag[];
 }
 
-export type NavigationTab = 'timeline' | 'capture' | 'analytics' | 'profile';
+export type NavigationTab = 'timeline' | 'calendar' | 'capture' | 'analytics' | 'profile';
 
 export interface CreateEntryDTO {
+  title?: string;
+  location?: string;
   image_url?: string;
   note_text: string;
   timestamp: string;
