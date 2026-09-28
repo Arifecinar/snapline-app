@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, Image, Platform, StatusBar as RNStatusBar } from 'react-native';
 import Svg, { Path, Defs, LinearGradient, Stop, Circle } from 'react-native-svg';
 import { Colors } from '../theme/colors';
 import { Entry } from '../types';
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: Platform.OS === 'ios' ? 56 : (RNStatusBar.currentHeight || 16) + 12,
     paddingBottom: 40,
   },
   header: {

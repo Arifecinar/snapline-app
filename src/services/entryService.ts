@@ -17,8 +17,8 @@ const MOCK_INITIAL_ENTRIES: Entry[] = [
     created_at: new Date(Date.now() - 3600 * 1000 * 6).toISOString(),
     tags: [
       { id: 't1', entry_id: 'mock-1', tag_name: 'Kahvaltı', mood_score: 5 },
-      { id: 't2', entry_id: 'mock-1', tag_name: 'Ev', mood_score: 5 }
-    ]
+      { id: 't2', entry_id: 'mock-1', tag_name: 'Ev', mood_score: 5 },
+    ],
   },
   {
     id: 'mock-2',
@@ -32,8 +32,8 @@ const MOCK_INITIAL_ENTRIES: Entry[] = [
     created_at: new Date(Date.now() - 3600 * 1000 * 3).toISOString(),
     tags: [
       { id: 't3', entry_id: 'mock-2', tag_name: 'Yürüyüş', mood_score: 5 },
-      { id: 't4', entry_id: 'mock-2', tag_name: 'Sahil', mood_score: 4 }
-    ]
+      { id: 't4', entry_id: 'mock-2', tag_name: 'Sahil', mood_score: 4 },
+    ],
   },
   {
     id: 'mock-3',
@@ -47,8 +47,8 @@ const MOCK_INITIAL_ENTRIES: Entry[] = [
     created_at: new Date(Date.now() - 3600 * 1000 * 1).toISOString(),
     tags: [
       { id: 't5', entry_id: 'mock-3', tag_name: 'kahve', mood_score: 5 },
-      { id: 't6', entry_id: 'mock-3', tag_name: 'ilkbahar', mood_score: 5 }
-    ]
+      { id: 't6', entry_id: 'mock-3', tag_name: 'ilkbahar', mood_score: 5 },
+    ],
   },
   {
     id: 'mock-4',
@@ -62,10 +62,43 @@ const MOCK_INITIAL_ENTRIES: Entry[] = [
     created_at: new Date(Date.now() - 86400 * 1000 * 1).toISOString(),
     tags: [
       { id: 't7', entry_id: 'mock-4', tag_name: 'Kitap', mood_score: 4 },
-      { id: 't8', entry_id: 'mock-4', tag_name: 'Sohbet', mood_score: 5 }
-    ]
-  }
+      { id: 't8', entry_id: 'mock-4', tag_name: 'Sohbet', mood_score: 5 },
+    ],
+  },
 ];
+
+export const uploadImageToSupabase = async (localUri: string): Promise<string> => {
+  if (!isSupabaseConfigured() || !localUri || localUri.startsWith('http')) {
+    return localUri;
+  }
+
+  try {
+    const filename = `entry_${Date.now()}.jpg`;
+    const response = await fetch(localUri);
+    const blob = await response.blob();
+
+    const { data, error } = await supabase.storage
+      .from('entries-images')
+      .upload(filename, blob, {
+        contentType: 'image/jpeg',
+        upsert: true,
+      });
+
+    if (error) {
+      console.warn('Storage upload error:', error.message);
+      return localUri;
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from('entries-images')
+      .getPublicUrl(filename);
+
+    return publicUrlData.publicUrl || localUri;
+  } catch (e) {
+    console.warn('Failed uploading image to Supabase Storage, using local URI', e);
+    return localUri;
+  }
+};
 
 export const fetchEntries = async (): Promise<Entry[]> => {
   if (isSupabaseConfigured()) {
@@ -109,12 +142,18 @@ export const createEntry = async (dto: CreateEntryDTO): Promise<Entry> => {
   const newEntryId = `entry-${Date.now()}`;
   const now = new Date();
 
+  // Upload image to Supabase if local file path
+  let finalImageUrl = dto.image_url || 'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=800&auto=format&fit=crop&q=80';
+  if (dto.image_url && !dto.image_url.startsWith('http')) {
+    finalImageUrl = await uploadImageToSupabase(dto.image_url);
+  }
+
   const newEntry: Entry = {
     id: newEntryId,
     user_id: 'user-demo',
     title: dto.title,
     location: dto.location,
-    image_url: dto.image_url || 'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=800&auto=format&fit=crop&q=80',
+    image_url: finalImageUrl,
     note_text: dto.note_text,
     timestamp: dto.timestamp || now.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }),
     entry_date: dto.entry_date || now.toISOString().split('T')[0],
@@ -140,7 +179,7 @@ export const createEntry = async (dto: CreateEntryDTO): Promise<Entry> => {
         .from('entries')
         .insert({
           user_id: currentUserId,
-          image_url: newEntry.image_url,
+          image_url: finalImageUrl,
           note_text: dto.note_text,
           timestamp: newEntry.timestamp,
           entry_date: newEntry.entry_date,
@@ -184,7 +223,7 @@ export const deleteEntry = async (id: string): Promise<void> => {
     }
   }
   const currentEntries = await fetchEntries();
-  const updated = currentEntries.filter(item => item.id !== id);
+  const updated = currentEntries.filter((item) => item.id !== id);
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
 };
 
@@ -194,8 +233,8 @@ export const calculateWeeklyStats = (entries: Entry[]): WeeklyStats => {
   let moodSum = 0;
   let moodTotalCount = 0;
 
-  entries.forEach(entry => {
-    entry.tags?.forEach(tag => {
+  entries.forEach((entry) => {
+    entry.tags?.forEach((tag) => {
       const score = tag.mood_score || 3;
       moodCounts[score] = (moodCounts[score] || 0) + 1;
       moodSum += score;
@@ -209,7 +248,7 @@ export const calculateWeeklyStats = (entries: Entry[]): WeeklyStats => {
   });
 
   const averageMood = moodTotalCount > 0 ? parseFloat((moodSum / moodTotalCount).toFixed(1)) : 4.0;
-  
+
   let topTag = 'Kahve';
   let maxTagCount = 0;
   Object.entries(tagFrequency).forEach(([tag, count]) => {

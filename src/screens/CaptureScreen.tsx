@@ -137,7 +137,8 @@ export const CaptureScreen: React.FC<CaptureScreenProps> = ({
     }
     setIsSubmitting(true);
     try {
-      await createEntry({
+      const { useEntryStore } = require('../store/entryStore');
+      const created = await useEntryStore.getState().addEntry({
         title: title.trim() || undefined,
         location: locationText.trim() || undefined,
         note_text: noteText.trim() || 'Fotoğraflı anı 📷',
@@ -147,8 +148,18 @@ export const CaptureScreen: React.FC<CaptureScreenProps> = ({
         tag_name: tags[0] || undefined,
         mood_score: moodScore,
       });
-      onEntryCreated();
-      onNavigate('timeline');
+
+      if (created) {
+        setTitle('');
+        setNoteText('');
+        setLocationText('');
+        setImageUri(null);
+        setTags([]);
+        onEntryCreated();
+        onNavigate('timeline');
+      } else {
+        Alert.alert('Hata', 'Anı kaydedilirken bir sorun oluştu.');
+      }
     } catch {
       Alert.alert('Hata', 'Anı kaydedilirken bir sorun oluştu. Lütfen tekrar deneyin.');
     } finally {

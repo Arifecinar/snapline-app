@@ -1,13 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import Svg, { Path, Rect, Circle } from 'react-native-svg';
+import { AuthModal } from '../components/AuthModal';
 
 interface WelcomeScreenProps {
-  onLogin: () => void;
-  onRegister: () => void;
+  onLogin?: () => void;
+  onRegister?: () => void;
 }
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onLogin, onRegister }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
+
+  const handleOpenLogin = () => {
+    if (onLogin) onLogin();
+    setAuthMode('login');
+    setModalVisible(true);
+  };
+
+  const handleOpenRegister = () => {
+    if (onRegister) onRegister();
+    setAuthMode('register');
+    setModalVisible(true);
+  };
+
   return (
     <View style={styles.container}>
       {/* Illustration Area */}
@@ -75,7 +91,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onLogin, onRegiste
         {/* Giriş Yap Button */}
         <TouchableOpacity
           style={styles.loginBtn}
-          onPress={onLogin}
+          onPress={handleOpenLogin}
           activeOpacity={0.85}
         >
           <Text style={styles.loginBtnText}>Giriş Yap</Text>
@@ -84,12 +100,19 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onLogin, onRegiste
         {/* Kaydol Button */}
         <TouchableOpacity
           style={styles.registerBtn}
-          onPress={onRegister}
+          onPress={handleOpenRegister}
           activeOpacity={0.8}
         >
           <Text style={styles.registerBtnText}>Kaydol</Text>
         </TouchableOpacity>
       </View>
+
+      {/* Auth Modal */}
+      <AuthModal
+        visible={modalVisible}
+        initialMode={authMode}
+        onClose={() => setModalVisible(false)}
+      />
     </View>
   );
 };

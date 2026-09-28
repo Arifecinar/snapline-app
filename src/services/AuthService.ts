@@ -1,14 +1,12 @@
 import * as SecureStore from 'expo-secure-store';
-import { createClient } from '@supabase/supabase-js';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { useAuthStore } from '../store/authStore';
-
-const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-
-const supabase = createClient(SUPABASE_URL ?? '', SUPABASE_ANON_KEY ?? '');
 
 export const AuthService = {
   async signIn(email: string, password: string) {
+    if (!isSupabaseConfigured()) {
+      return this.signInDemo(email || 'demo@snapline.app');
+    }
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     const session = data.session;
@@ -21,6 +19,9 @@ export const AuthService = {
   },
 
   async signUp(email: string, password: string) {
+    if (!isSupabaseConfigured()) {
+      return this.signInDemo(email || 'demo@snapline.app');
+    }
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) throw error;
     const session = data.session;
@@ -32,18 +33,43 @@ export const AuthService = {
     return data;
   },
 
+  async signInDemo(email = 'demo@snapline.app') {
+    const demoSession = {
+      access_token: 'demo-access-token',
+      user: {
+        id: 'user-demo',
+        email,
+        user_metadata: { full_name: 'Demo Kullanıcı' },
+      },
+    };
+    await SecureStore.setItemAsync('session', JSON.stringify(demoSession));
+    useAuthStore.getState().setSession(demoSession);
+    useAuthStore.getState().setUser(demoSession.user);
+    return { session: demoSession, user: demoSession.user };
+  },
+
   async signOut() {
-    await supabase.auth.signOut();
+    if (isSupabaseConfigured()) {
+      try {
+        await supabase.auth.signOut();
+      } catch (e) {
+        console.warn('Supabase sign out error', e);
+      }
+    }
     await SecureStore.deleteItemAsync('session');
     useAuthStore.getState().logout();
   },
 
   async loadSession() {
-    const raw = await SecureStore.getItemAsync('session');
-    if (raw) {
-      const session = JSON.parse(raw);
-      useAuthStore.getState().setSession(session);
-      useAuthStore.getState().setUser(session.user);
+    try {
+      const raw = await SecureStore.getItemAsync('session');
+      if (raw) {
+        const session = JSON.parse(raw);
+        useAuthStore.getState().setSession(session);
+        useAuthStore.getState().setUser(session.user);
+      }
+    } catch (e) {
+      console.warn('Session load failed', e);
     }
   },
 };

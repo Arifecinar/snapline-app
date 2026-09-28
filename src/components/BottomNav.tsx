@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Platform } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
 import { NavigationTab } from '../types';
@@ -18,7 +18,15 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   const theme = isDarkMode ? Colors.dark : Colors.light;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.tabBarBackground, borderTopColor: theme.cardBorder }]}>
+    <View
+      style={[
+        styles.container,
+        {
+          backgroundColor: theme.tabBarBackground,
+          borderTopColor: theme.cardBorder,
+        },
+      ]}
+    >
       {/* 1. Günün Akışı (Timeline) */}
       <TouchableOpacity
         style={styles.tabItem}
@@ -76,9 +84,9 @@ export const BottomNav: React.FC<BottomNavProps> = ({
         activeOpacity={0.7}
       >
         <Ionicons
-          name={currentTab === 'profile' ? 'person' : 'person-outline'}
+          name={currentTab === 'profile' || currentTab === ('settings' as any) ? 'person' : 'person-outline'}
           size={24}
-          color={currentTab === 'profile' ? theme.accent : theme.textMuted}
+          color={currentTab === 'profile' || currentTab === ('settings' as any) ? theme.accent : theme.textMuted}
         />
       </TouchableOpacity>
     </View>
@@ -88,7 +96,8 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    height: 64,
+    height: Platform.OS === 'ios' ? 76 : 64,
+    paddingBottom: Platform.OS === 'ios' ? 16 : 0,
     borderTopWidth: 1,
     paddingHorizontal: 12,
     alignItems: 'center',
@@ -106,9 +115,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   floatingAddBtn: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#4E7185',

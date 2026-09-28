@@ -5,6 +5,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Platform,
+  StatusBar as RNStatusBar,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../theme/colors';
@@ -245,7 +247,9 @@ const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 16 },
   topHeader: {
     flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingTop: 12, paddingBottom: 8,
+    alignItems: 'center',
+    paddingTop: Platform.OS === 'ios' ? 56 : (RNStatusBar.currentHeight || 16) + 12,
+    paddingBottom: 8,
   },
   headerIconBtn: { padding: 6 },
   headerCenter: { alignItems: 'center' },
